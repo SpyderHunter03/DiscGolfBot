@@ -1,7 +1,11 @@
 ﻿/* This is the cancellation token we'll use to end the bot if needed(used for most async stuff). */
+using DiscgolfBot.Data;
+using DiscgolfBot.SlashCommands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 CancellationTokenSource _cts;
@@ -19,7 +23,11 @@ try
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
         .AddJsonFile($"appsettings.Development.json", optional: true)
         .Build();
-    
+
+    var services = new ServiceCollection()
+        .AddScoped<IDiscRepository, DiscRepository>(dr => new DiscRepository(_config.GetConnectionString("Database")!))
+        .BuildServiceProvider();
+
     // Create the DSharpPlus client
     Console.WriteLine("[info] Creating discord client..");
     _discord = new DiscordClient(new DiscordConfiguration
@@ -48,12 +56,23 @@ try
         StringPrefixes = prefixes, // Load the command prefix(what comes before the command, eg "!" or "/") from our config file
     });
 
+    var slashCommands = _discord.UseSlashCommands(new SlashCommandsConfiguration
+    {
+        Services = services
+    });
+
     // Add command loading
     Console.WriteLine("[info] Loading command modules..");
 
     commands.RegisterCommands(Assembly.GetExecutingAssembly());
-
+    
     Console.WriteLine($"[info] {commands.RegisteredCommands.Count} command modules loaded");
+
+    Console.WriteLine("[info] Loading slash command modules..");
+
+    slashCommands.RegisterCommands<DiscSlashCommand>(1037730809244823592);
+
+    Console.WriteLine($"[info] {slashCommands.RegisteredCommands.Count} slash command modules loaded");
 
     RunAsync().Wait();
 }
