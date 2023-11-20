@@ -23,7 +23,7 @@ jobs:
     - name: Print directory
       run: ls
     - name: Enter folder
-      run: cd DiscGolfBot
+      run: cd DiscgolfBot
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
