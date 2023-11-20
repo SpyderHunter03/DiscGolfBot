@@ -25,7 +25,7 @@ jobs:
     - name: Print directory
       run: ls
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./DiscgolfBot/DiscgolfBot.sln
     - name: Build
       run: dotnet build ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-restore
     - name: Publish
