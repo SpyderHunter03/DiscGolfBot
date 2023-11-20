@@ -20,14 +20,10 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
-    - name: Enter folder
-      run: cd DiscgolfBot
-    - name: Print directory
-      run: ls
     - name: Restore dependencies
       run: dotnet restore ./DiscgolfBot/DiscgolfBot.sln
     - name: Build
       run: dotnet build ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-restore
     - name: Publish
-      run: dotnet publish ./DiscgolfBot/DiscgolfBot.sln
+      run: dotnet publish ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-build --output ./publish
     
