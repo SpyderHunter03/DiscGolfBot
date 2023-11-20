@@ -22,6 +22,8 @@ jobs:
         dotnet-version: 6.0.x
     - name: Print directory
       run: ls
+    - name: Enter folder
+      run: cd DiscGolfBot
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
