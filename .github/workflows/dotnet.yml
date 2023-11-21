@@ -20,19 +20,20 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: App Settings Variable Substitution
+      uses: microsoft/variable-substitution@v1
+      with:
+        files: '${{env.DOTNET_ROOT}}/DiscGolfBot/appsettings.json'
+      env:
+        ConnectionStrings.Database: ${{ secrets.CONNECTION_STRING }}
+        Discord.Token: ${{ env.DISCORD_TOKEN }}
     - name: Restore dependencies
       run: dotnet restore ./DiscgolfBot/DiscgolfBot.sln
     - name: Build
       run: dotnet build ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-restore
     - name: Publish
       run: dotnet publish ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-build --output ./publish
-    - name: Print folder
-      run: ls -R .
-    - name: Copy Service File To Systemd
-      run: cp ./service/discgolfbot.service /etc/systemd/system/DiscGolfBot.service
-    - name: Restart Systemctl
-      run: systemctl daemon-reload
-    - name: Start service
+    - name: Stop service
       run: systemctl stop DiscGolfBot
     - name: Start service
       run: systemctl start DiscGolfBot
