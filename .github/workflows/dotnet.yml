@@ -29,7 +29,7 @@ jobs:
     - name: Print folder
       run: ls -R .
     - name: Copy Service File To Systemd
-      run: cp ./DiscGolfBot/DiscGolfBot/service/discgolfbot.service /etc/systemd/system/DiscGolfBot.service
+      run: cp ./service/discgolfbot.service /etc/systemd/system/DiscGolfBot.service
     - name: Restart Systemctl
       run: systemctl daemon-reload
     - name: Start service
