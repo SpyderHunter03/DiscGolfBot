@@ -20,10 +20,12 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: Print File
+      run: ls -R .
     - name: App Settings Variable Substitution
       uses: microsoft/variable-substitution@v1
       with:
-        files: './DiscGolfBot/appsettings.json'
+        files: './DiscgolfBot/appsettings.json'
       env:
         ConnectionStrings.Database: ${{ secrets.CONNECTION_STRING }}
         Discord.Token: ${{ env.DISCORD_TOKEN }}
