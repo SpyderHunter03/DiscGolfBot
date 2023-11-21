@@ -33,4 +33,6 @@ jobs:
     - name: Restart Systemctl
       run: systemctl daemon-reload
     - name: Start service
+      run: systemctl stop DiscGolfBot
+    - name: Start service
       run: systemctl start DiscGolfBot
