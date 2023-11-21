@@ -19,7 +19,7 @@ try
     // Load the config file(we'll create this shortly)
     Console.WriteLine("[info] Loading config file..");
     var _config = new ConfigurationBuilder()
-        .SetBasePath(Directory.GetCurrentDirectory())
+        //.SetBasePath(Directory.GetCurrentDirectory())
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
         .AddJsonFile($"appsettings.Development.json", optional: true)
         .Build();
