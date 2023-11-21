@@ -35,7 +35,5 @@ jobs:
       run: dotnet build ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-restore
     - name: Publish
       run: dotnet publish ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-build --output ./publish
-    - name: Stop service
-      run: systemctl stop DiscGolfBot
-    - name: Start service
-      run: systemctl start DiscGolfBot
+    - name: Restart service
+      run: systemctl restart DiscGolfBot
