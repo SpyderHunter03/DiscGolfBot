@@ -46,7 +46,7 @@ try
     //    Timeout = TimeSpan.FromSeconds(30)
     //});
 
-    SetupCommands(_config);
+    //SetupCommands(_config);
 
     SetupSlashCommands(services);
 
