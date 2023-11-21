@@ -27,7 +27,7 @@ namespace DiscgolfBot.SlashCommands
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine($"{ctx.Member.DisplayName} called /disc {discName} \n{ex}");
                 await ctx.Channel.SendMessageAsync($"An error has occured. Check logs.");
             }
         }
@@ -35,7 +35,7 @@ namespace DiscgolfBot.SlashCommands
         protected static DiscordEmbed GetDiscEmbed(Disc disc) =>
             new DiscordEmbedBuilder()
                     .WithTitle(disc.Name)
-                    .WithDescription($"{disc.Manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}\nPDGA")
+                    .WithDescription($"{disc.Manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}")
                     .WithColor(DiscordColor.Azure)
                     .Build();
 
