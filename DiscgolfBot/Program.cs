@@ -6,7 +6,9 @@ using DSharpPlus.CommandsNext;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Org.BouncyCastle.Security;
 using System.Reflection;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 CancellationTokenSource _cts;
 DiscordClient _discord;
@@ -44,35 +46,9 @@ try
     //    Timeout = TimeSpan.FromSeconds(30)
     //});
 
-    var prefixConfiguration = _config.GetValue<string>("discord:commandPrefix") ?? 
-        throw new InvalidDataException("No Discord:commandPrefix value");
+    SetupCommands(_config);
 
-    var prefixes = prefixConfiguration.ToCharArray().Select(c => $"{c}");
-    Console.WriteLine($"[info] Command prefixes: {string.Join(',', prefixes)}");
-
-    // Build dependancies and then create the commands module.
-    var commands = _discord.UseCommandsNext(new CommandsNextConfiguration
-    {
-        StringPrefixes = prefixes, // Load the command prefix(what comes before the command, eg "!" or "/") from our config file
-    });
-
-    var slashCommands = _discord.UseSlashCommands(new SlashCommandsConfiguration
-    {
-        Services = services
-    });
-
-    // Add command loading
-    Console.WriteLine("[info] Loading command modules..");
-
-    commands.RegisterCommands(Assembly.GetExecutingAssembly());
-    
-    Console.WriteLine($"[info] {commands.RegisteredCommands.Count} command modules loaded");
-
-    Console.WriteLine("[info] Loading slash command modules..");
-
-    slashCommands.RegisterCommands<DiscSlashCommand>(1037730809244823592);
-
-    Console.WriteLine($"[info] {slashCommands.RegisteredCommands.Count} slash command modules loaded");
+    SetupSlashCommands(services);
 
     RunAsync().Wait();
 }
@@ -92,4 +68,40 @@ async Task RunAsync()
     // Keep the bot running until the cancellation token requests we stop
     while (!_cts.IsCancellationRequested)
         await Task.Delay(TimeSpan.FromMinutes(1));
+}
+
+void SetupCommands(IConfigurationRoot _config)
+{
+    var prefixConfiguration = _config.GetValue<string>("discord:commandPrefix") ??
+        throw new InvalidDataException("No Discord:commandPrefix value");
+
+    var prefixes = prefixConfiguration.ToCharArray().Select(c => $"{c}");
+    Console.WriteLine($"[info] Command prefixes: {string.Join(',', prefixes)}");
+
+    // Build dependancies and then create the commands module.
+    var commands = _discord.UseCommandsNext(new CommandsNextConfiguration
+    {
+        StringPrefixes = prefixes, // Load the command prefix(what comes before the command, eg "!" or "/") from our config file
+    });
+
+    // Add command loading
+    Console.WriteLine("[info] Loading command modules..");
+
+    commands.RegisterCommands(Assembly.GetExecutingAssembly());
+
+    Console.WriteLine($"[info] {commands.RegisteredCommands.Count} command modules loaded");
+}
+
+void SetupSlashCommands(ServiceProvider services)
+{
+    var slashCommands = _discord.UseSlashCommands(new SlashCommandsConfiguration
+    {
+        Services = services
+    });
+
+    Console.WriteLine("[info] Loading slash command modules..");
+
+    slashCommands.RegisterCommands<DiscSlashCommand>(1037730809244823592);
+
+    Console.WriteLine($"[info] {slashCommands.RegisteredCommands.Count} slash command modules loaded");
 }
