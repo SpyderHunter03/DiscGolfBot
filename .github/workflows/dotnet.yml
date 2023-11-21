@@ -26,6 +26,8 @@ jobs:
       run: dotnet build ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-restore
     - name: Publish
       run: dotnet publish ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-build --output ./publish
+    - name: Print folder
+      run: ls -R .
     - name: Copy Service File To Systemd
       run: cp ./DiscGolfBot/DiscGolfBot/service/discgolfbot.service /etc/systemd/system/DiscGolfBot.service
     - name: Restart Systemctl
