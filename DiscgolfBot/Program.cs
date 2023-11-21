@@ -101,6 +101,8 @@ void SetupSlashCommands(ServiceProvider services)
 
     Console.WriteLine("[info] Loading slash command modules..");
 
+    slashCommands.RegisterCommands<ApplicationCommandModule>();
+    slashCommands.RegisterCommands<ApplicationCommandModule>(1037730809244823592);
     slashCommands.RegisterCommands<DiscSlashCommand>(1037730809244823592);
 
     Console.WriteLine($"[info] {slashCommands.RegisteredCommands.Count} slash command modules loaded");

@@ -35,7 +35,7 @@ namespace DiscgolfBot.SlashCommands
         protected static DiscordEmbed GetDiscEmbed(Disc disc) =>
             new DiscordEmbedBuilder()
                     .WithTitle(disc.Name)
-                    .WithDescription($"{disc.Manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}")
+                    .WithDescription($"{disc.Manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}\nPDGA")
                     .WithColor(DiscordColor.Azure)
                     .Build();
 
