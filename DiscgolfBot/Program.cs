@@ -1,14 +1,14 @@
 ﻿/* This is the cancellation token we'll use to end the bot if needed(used for most async stuff). */
 using DiscgolfBot.Data;
 using DiscgolfBot.SlashCommands;
+using DiscgolfBot.SlashCommands.DiscCommands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Org.BouncyCastle.Security;
 using System.Reflection;
-using static Org.BouncyCastle.Math.EC.ECCurve;
 
 CancellationTokenSource _cts;
 DiscordClient _discord;
@@ -47,8 +47,8 @@ try
     //});
 
     //SetupCommands(_config);
-
-    SetupSlashCommands(services);
+    
+    await SetupSlashCommands(services);
 
     RunAsync().Wait();
 }
@@ -92,7 +92,7 @@ void SetupCommands(IConfigurationRoot _config)
     Console.WriteLine($"[info] {commands.RegisteredCommands.Count} command modules loaded");
 }
 
-void SetupSlashCommands(ServiceProvider services)
+async Task SetupSlashCommands(ServiceProvider services)
 {
     var slashCommands = _discord.UseSlashCommands(new SlashCommandsConfiguration
     {
@@ -100,10 +100,13 @@ void SetupSlashCommands(ServiceProvider services)
     });
 
     Console.WriteLine("[info] Loading slash command modules..");
+    //await _discord.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
+    //await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, Array.Empty<DiscordApplicationCommand>());
 
-    slashCommands.RegisterCommands<ApplicationCommandModule>();
-    slashCommands.RegisterCommands<ApplicationCommandModule>(1037730809244823592);
     slashCommands.RegisterCommands<DiscSlashCommand>(1037730809244823592);
+    slashCommands.RegisterCommands<HelpSlashCommand>(1037730809244823592);
+    slashCommands.RegisterCommands<AdvancedDiscSlashCommand>(1037730809244823592);
+    slashCommands.RegisterCommands<DiscReviewSlashCommand>(1037730809244823592);
 
     Console.WriteLine($"[info] {slashCommands.RegisteredCommands.Count} slash command modules loaded");
 }

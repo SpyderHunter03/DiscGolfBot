@@ -4,7 +4,7 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 
-namespace DiscgolfBot.SlashCommands
+namespace DiscgolfBot.SlashCommands.DiscCommands
 {
     public class DiscSlashCommand : ApplicationCommandModule
     {
@@ -13,7 +13,7 @@ namespace DiscgolfBot.SlashCommands
         [SlashCommand("disc", "Get disc information!")]
         public async Task Command(InteractionContext ctx, [Option("name", "Disc Name")] string discName)
         {
-            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, 
+            await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().WithContent($"{ctx.Member.DisplayName} called /disc {discName}")
             );
 
@@ -25,7 +25,7 @@ namespace DiscgolfBot.SlashCommands
 
                 await ctx.Channel.SendMessageAsync(embed);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine($"{ctx.Member.DisplayName} called /disc {discName} \n{ex}");
                 await ctx.Channel.SendMessageAsync($"An error has occured. Check logs.");
@@ -35,7 +35,7 @@ namespace DiscgolfBot.SlashCommands
         protected static DiscordEmbed GetDiscEmbed(Disc disc) =>
             new DiscordEmbedBuilder()
                     .WithTitle(disc.Name)
-                    .WithDescription($"{disc.Manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}\nPDGA")
+                    .WithDescription($"{disc.Manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}\n[PDGA](https://www.pdga.com/technical-standards/equipment-certification/discs/{disc.Name})")
                     .WithColor(DiscordColor.Azure)
                     .Build();
 
@@ -46,4 +46,4 @@ namespace DiscgolfBot.SlashCommands
                     .WithColor(DiscordColor.Red)
                     .Build();
     }
-} 
+}
