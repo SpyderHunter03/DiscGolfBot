@@ -33,8 +33,6 @@ namespace DiscgolfBot.SlashCommands
                     .GroupBy(x => x.Category)
                     .ToList();
 
-                var a = slashCommandClasses.FirstOrDefault(s => s.Key.ToLower().Equals(categoryName.ToLower()));
-
                 var embed = string.IsNullOrWhiteSpace(categoryName) ? 
                                 GetHelpEmbed(slashCommandClasses!) :
                             slashCommandClasses.Any(s => s.Key.ToLower().Equals(categoryName.ToLower())) ?
