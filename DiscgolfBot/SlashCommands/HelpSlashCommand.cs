@@ -1,4 +1,5 @@
-﻿using DSharpPlus;
+﻿using DiscgolfBot.Services;
+using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using System.Reflection;
@@ -7,6 +8,8 @@ namespace DiscgolfBot.SlashCommands
 {
     public class HelpSlashCommand : ApplicationCommandModule
     {
+        public IErrorService _errorService { private get; set; } // The get accessor is optionally public, but the set accessor must be public.
+
         [SlashCommand("help", "Get help with bot commands")]
         public async Task Command(InteractionContext ctx, [Option("categoryName", "Category Name")] string? categoryName = null)
         {
@@ -44,8 +47,7 @@ namespace DiscgolfBot.SlashCommands
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{_responseContent}\n{ex}");
-                await ctx.Channel.SendMessageAsync($"An error has occured. Check logs.");
+                await _errorService.CommandErrorThrown(ex, ctx, _responseContent);
             }
         }
 

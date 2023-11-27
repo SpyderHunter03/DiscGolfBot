@@ -1,6 +1,7 @@
 ﻿using DiscgolfBot.Data;
 using DiscgolfBot.Data.Models;
 using DiscgolfBot.Helpers;
+using DiscgolfBot.Services;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -10,6 +11,7 @@ namespace DiscgolfBot.SlashCommands.DiscCommands
     public class DiscReviewSlashCommand : ApplicationCommandModule
     {
         public IDiscRepository _discRespository { private get; set; } // The get accessor is optionally public, but the set accessor must be public.
+        public IErrorService _errorService { private get; set; } // The get accessor is optionally public, but the set accessor must be public.
 
         [SlashCommand("reviewdisc", "Review a disc")]
         public async Task Command(InteractionContext ctx, [Option("name", "Disc Name")] string discName, [Option("review", "Disc Review")] string discReview)
@@ -32,8 +34,7 @@ namespace DiscgolfBot.SlashCommands.DiscCommands
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"{ctx.Member.DisplayName} called /reviewdisc {discName} {discReview} \n{ex}");
-                await ctx.Channel.SendMessageAsync($"An error has occured. Check logs.");
+                await _errorService.CommandErrorThrown(ex, ctx, $"{ctx.Member.DisplayName} called /reviewdisc {discName} {discReview}");
             }
         }
 

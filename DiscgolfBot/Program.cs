@@ -1,5 +1,6 @@
 ﻿/* This is the cancellation token we'll use to end the bot if needed(used for most async stuff). */
 using DiscgolfBot.Data;
+using DiscgolfBot.Services;
 using DiscgolfBot.SlashCommands;
 using DiscgolfBot.SlashCommands.DiscCommands;
 using DSharpPlus;
@@ -28,6 +29,7 @@ try
 
     var services = new ServiceCollection()
         .AddScoped<IDiscRepository, DiscRepository>(dr => new DiscRepository(_config.GetConnectionString("Database")!))
+        .AddScoped<IErrorService, ErrorService>()
         .BuildServiceProvider();
 
     // Create the DSharpPlus client
