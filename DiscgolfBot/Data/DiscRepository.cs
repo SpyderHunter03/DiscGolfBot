@@ -79,5 +79,17 @@ namespace DiscgolfBot.Data
 
             return counts;
         }
+
+        public async Task<Disc> AddDisc(string discName, string manufacturer, double speed, double glide, double turn, double fade)
+        {
+            var insertQuery = $"INSERT INTO discs (name, manufacturer, speed, glide, turn, fade) VALUES (@discName, @manufacturer, @speed, @glide, @turn, @fade)";
+            var selectQuery = $"SELECT * FROM discs WHERE name = @discName";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var rowsAffected = await connection.ExecuteAsync(insertQuery, new
+                { discName, manufacturer, speed, glide, turn, fade });
+            var insertedDisc = await connection.QuerySingleAsync<Disc>(selectQuery, new { discName });
+            return insertedDisc;
+        }
     }
 }

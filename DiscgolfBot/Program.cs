@@ -2,10 +2,10 @@
 using DiscgolfBot.Data;
 using DiscgolfBot.Services;
 using DiscgolfBot.SlashCommands;
+using DiscgolfBot.SlashCommands.BagCommands;
 using DiscgolfBot.SlashCommands.DiscCommands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,6 +29,8 @@ try
 
     var services = new ServiceCollection()
         .AddScoped<IDiscRepository, DiscRepository>(dr => new DiscRepository(_config.GetConnectionString("Database")!))
+        .AddScoped<IUserRepository, UserRepository>(dr => new UserRepository(_config.GetConnectionString("Database")!))
+        .AddScoped<IBagRepository, BagRepository>(dr => new BagRepository(_config.GetConnectionString("Database")!))
         .AddScoped<IErrorService, ErrorService>()
         .BuildServiceProvider();
 
@@ -50,7 +52,7 @@ try
 
     //SetupCommands(_config);
     
-    await SetupSlashCommands(services);
+    SetupSlashCommands(services);
 
     RunAsync().Wait();
 }
@@ -94,7 +96,7 @@ void SetupCommands(IConfigurationRoot _config)
     Console.WriteLine($"[info] {commands.RegisteredCommands.Count} command modules loaded");
 }
 
-async Task SetupSlashCommands(ServiceProvider services)
+void SetupSlashCommands(ServiceProvider services)
 {
     var slashCommands = _discord.UseSlashCommands(new SlashCommandsConfiguration
     {
@@ -109,6 +111,8 @@ async Task SetupSlashCommands(ServiceProvider services)
     slashCommands.RegisterCommands<HelpSlashCommand>(1037730809244823592);
     slashCommands.RegisterCommands<AdvancedDiscSlashCommand>(1037730809244823592);
     slashCommands.RegisterCommands<DiscReviewSlashCommand>(1037730809244823592);
+    slashCommands.RegisterCommands<AddDiscSlashCommand>(1037730809244823592);
+    slashCommands.RegisterCommands<IBagSlashCommand>(1037730809244823592);
 
     Console.WriteLine($"[info] {slashCommands.RegisteredCommands.Count} slash command modules loaded");
 }
