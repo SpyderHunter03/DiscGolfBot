@@ -22,7 +22,7 @@ jobs:
         files: './DiscgolfBot/appsettings.json'
       env:
         ConnectionStrings.Database: ${{ secrets.CONNECTION_STRING }}
-        Discord.Token: ${{ env.DISCORD_TOKEN }}
+        Discord.Token: ${{ secrets.DISCORD_TOKEN }}
     - name: Restore dependencies
       run: dotnet restore ./DiscgolfBot/DiscgolfBot.sln
     - name: Build
