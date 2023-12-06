@@ -22,11 +22,15 @@ try
 
     // Load the config file(we'll create this shortly)
     Console.WriteLine("[info] Loading config file..");
+    var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    var basePath = Directory.GetCurrentDirectory();
+    var devSettingsPath = Path.Combine(basePath, $"appsettings.{environmentName}.json");
+    Console.WriteLine($"Development settings path: {devSettingsPath}");
     var builder = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
-            .AddEnvironmentVariables();
+        .SetBasePath(basePath)
+        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+        .AddJsonFile(Path.Combine(basePath, $"appsettings.{environmentName}.json"), optional: true)
+        .AddEnvironmentVariables();
 
     var _config = builder.Build();
 
