@@ -25,7 +25,7 @@ try
     var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
     var basePath = Directory.GetCurrentDirectory();
     var devSettingsPath = Path.Combine(basePath, $"appsettings.{environmentName}.json");
-    Console.WriteLine($"Development settings path: {devSettingsPath}");
+    
     var builder = new ConfigurationBuilder()
         .SetBasePath(basePath)
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
