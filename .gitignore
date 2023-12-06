@@ -396,4 +396,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
-/DiscgolfBot/appsettings.Development.json
+appsettings.Development.json

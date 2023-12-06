@@ -22,11 +22,13 @@ try
 
     // Load the config file(we'll create this shortly)
     Console.WriteLine("[info] Loading config file..");
-    var _config = new ConfigurationBuilder()
-        //.SetBasePath(Directory.GetCurrentDirectory())
-        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-        .AddJsonFile($"appsettings.Development.json", optional: true)
-        .Build();
+    var builder = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
+            .AddEnvironmentVariables();
+
+    var _config = builder.Build();
 
     var services = new ServiceCollection()
         .AddScoped<IDiscRepository, DiscRepository>(dr => new DiscRepository(_config.GetConnectionString("Database")!))
