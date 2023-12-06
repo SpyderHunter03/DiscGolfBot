@@ -7,6 +7,7 @@ using DiscgolfBot.SlashCommands.DiscCommands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.SlashCommands;
+using DSharpPlus.SlashCommands.EventArgs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -103,6 +104,8 @@ void SetupSlashCommands(ServiceProvider services)
         Services = services
     });
 
+    slashCommands.SlashCommandErrored += SlashCommandErrored;
+    slashCommands.AutocompleteErrored += AutocompleteErrored;
     Console.WriteLine("[info] Loading slash command modules..");
     //await _discord.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
     //await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, Array.Empty<DiscordApplicationCommand>());
@@ -115,4 +118,14 @@ void SetupSlashCommands(ServiceProvider services)
     slashCommands.RegisterCommands<IBagSlashCommand>(1037730809244823592);
 
     Console.WriteLine($"[info] {slashCommands.RegisteredCommands.Count} slash command modules loaded");
+}
+
+async Task AutocompleteErrored(SlashCommandsExtension s, AutocompleteErrorEventArgs e)
+{
+    Console.WriteLine($"Autocomplete errored: {e.Exception.Message}");
+}
+
+async Task SlashCommandErrored(SlashCommandsExtension s, SlashCommandErrorEventArgs e)
+{
+    Console.WriteLine($"Slash command errored: {e.Exception.Message}");
 }
