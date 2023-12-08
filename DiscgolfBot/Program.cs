@@ -126,6 +126,7 @@ void SetupSlashCommands(ServiceProvider services)
     else
     {
         slashCommands.RegisterCommands<ApplicationCommandModule>();
+        slashCommands.RegisterCommands<ApplicationCommandModule>(1037730809244823592);
         slashCommands.RegisterCommands(assembly);
     }
 
