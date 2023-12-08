@@ -1,9 +1,6 @@
 ﻿/* This is the cancellation token we'll use to end the bot if needed(used for most async stuff). */
 using DiscgolfBot.Data;
 using DiscgolfBot.Services;
-using DiscgolfBot.SlashCommands;
-using DiscgolfBot.SlashCommands.BagCommands;
-using DiscgolfBot.SlashCommands.DiscCommands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.SlashCommands;
@@ -25,7 +22,7 @@ try
     var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
     var basePath = Directory.GetCurrentDirectory();
     var devSettingsPath = Path.Combine(basePath, $"appsettings.{environmentName}.json");
-    
+
     var builder = new ConfigurationBuilder()
         .SetBasePath(basePath)
         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -116,14 +113,23 @@ void SetupSlashCommands(ServiceProvider services)
     //await _discord.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
     //await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, Array.Empty<DiscordApplicationCommand>());
 
-    slashCommands.RegisterCommands<DiscSlashCommand>(1037730809244823592);
-    slashCommands.RegisterCommands<HelpSlashCommand>(1037730809244823592);
-    slashCommands.RegisterCommands<AdvancedDiscSlashCommand>(1037730809244823592);
-    slashCommands.RegisterCommands<DiscReviewSlashCommand>(1037730809244823592);
-    slashCommands.RegisterCommands<AddDiscSlashCommand>(1037730809244823592);
-    slashCommands.RegisterCommands<IBagSlashCommand>(1037730809244823592);
 
-    Console.WriteLine($"[info] {slashCommands.RegisteredCommands.Count} slash command modules loaded");
+    var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    ulong? slashCommandsGuildId = (environmentName?.ToLower().Equals("Development".ToLower()) ?? false) ?
+        1037730809244823592 : null;
+
+    var assembly = Assembly.GetExecutingAssembly();
+    slashCommands.RegisterCommands(assembly, slashCommandsGuildId);
+
+    var slashCommandClasses = assembly.GetTypes()
+                    .SelectMany(t => t.GetMethods(),
+                                (t, m) => new { Type = t, Method = m, Attributes = m.GetCustomAttributes(typeof(SlashCommandAttribute), true) })
+                    .Where(x => x.Attributes.Any())
+                    .ToList();
+
+    Console.WriteLine($"[info] {slashCommandClasses.Count} slash command modules loaded:");
+    foreach(var slashCommand in slashCommandClasses)
+        Console.WriteLine($"\t[info] {slashCommand.Type.Name} module loaded");
 }
 
 async Task AutocompleteErrored(SlashCommandsExtension s, AutocompleteErrorEventArgs e)
