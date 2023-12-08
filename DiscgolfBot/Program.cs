@@ -111,20 +111,23 @@ void SetupSlashCommands(ServiceProvider services)
     slashCommands.SlashCommandErrored += SlashCommandErrored;
     slashCommands.AutocompleteErrored += AutocompleteErrored;
     Console.WriteLine("[info] Loading slash command modules..");
+    var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    var isDevelopment = environmentName?.ToLower().Equals("Development".ToLower()) ?? false;
+    var assembly = Assembly.GetExecutingAssembly();
     //await _discord.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
     //await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, Array.Empty<DiscordApplicationCommand>());
-
-    //slashCommands.RegisterCommands<DiscSlashCommand>();
-
-    var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-    ulong? slashCommandsGuildId = (environmentName?.ToLower().Equals("Development".ToLower()) ?? false) ?
-        1037730809244823592 : null;
-
-    var assembly = Assembly.GetExecutingAssembly();
-    if (slashCommandsGuildId.HasValue)
-        slashCommands.RegisterCommands(assembly, slashCommandsGuildId);
+    ulong? slashCommandsGuildId = null;
+    if (isDevelopment)
+    {
+        slashCommandsGuildId = 1037730809244823592;
+        slashCommands.RegisterCommands<ApplicationCommandModule>(slashCommandsGuildId.Value);
+        slashCommands.RegisterCommands(assembly, slashCommandsGuildId.Value);
+    }
     else
+    {
+        slashCommands.RegisterCommands<ApplicationCommandModule>();
         slashCommands.RegisterCommands(assembly);
+    }
 
     var slashCommandClasses = assembly.GetTypes()
                     .SelectMany(t => t.GetMethods(),
@@ -134,7 +137,7 @@ void SetupSlashCommands(ServiceProvider services)
 
     Console.WriteLine($"[info] {slashCommandClasses.Count} slash command modules loaded:");
     foreach(var slashCommand in slashCommandClasses)
-        Console.WriteLine($"\t[info] {slashCommand.Type.Name} module loaded for {(slashCommandsGuildId.HasValue ? $"guild {slashCommandsGuildId.Value}" : "all guilds")}");
+        Console.WriteLine($"\t[info] {slashCommand.Type.Name} module loaded for {(isDevelopment && slashCommandsGuildId.HasValue ? $"guild {slashCommandsGuildId.Value}" : "all guilds")}");
 }
 
 async Task AutocompleteErrored(SlashCommandsExtension s, AutocompleteErrorEventArgs e)
