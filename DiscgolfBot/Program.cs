@@ -119,7 +119,10 @@ void SetupSlashCommands(ServiceProvider services)
         1037730809244823592 : null;
 
     var assembly = Assembly.GetExecutingAssembly();
-    slashCommands.RegisterCommands(assembly, slashCommandsGuildId);
+    if (slashCommandsGuildId.HasValue)
+        slashCommands.RegisterCommands(assembly, slashCommandsGuildId);
+    else
+        slashCommands.RegisterCommands(assembly);
 
     var slashCommandClasses = assembly.GetTypes()
                     .SelectMany(t => t.GetMethods(),
