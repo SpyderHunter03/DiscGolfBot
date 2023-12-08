@@ -129,7 +129,7 @@ void SetupSlashCommands(ServiceProvider services)
 
     Console.WriteLine($"[info] {slashCommandClasses.Count} slash command modules loaded:");
     foreach(var slashCommand in slashCommandClasses)
-        Console.WriteLine($"\t[info] {slashCommand.Type.Name} module loaded");
+        Console.WriteLine($"\t[info] {slashCommand.Type.Name} module loaded for {(slashCommandsGuildId.HasValue ? $"guild {slashCommandsGuildId.Value}" : "all guilds")}");
 }
 
 async Task AutocompleteErrored(SlashCommandsExtension s, AutocompleteErrorEventArgs e)
