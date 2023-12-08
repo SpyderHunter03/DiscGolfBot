@@ -114,7 +114,7 @@ void SetupSlashCommands(ServiceProvider services)
     //await _discord.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
     //await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, Array.Empty<DiscordApplicationCommand>());
 
-    slashCommands.RegisterCommands<DiscSlashCommand>();
+    //slashCommands.RegisterCommands<DiscSlashCommand>();
 
     var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
     ulong? slashCommandsGuildId = (environmentName?.ToLower().Equals("Development".ToLower()) ?? false) ?
