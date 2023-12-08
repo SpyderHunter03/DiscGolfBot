@@ -129,7 +129,7 @@ void SetupSlashCommands(ServiceProvider services)
     var slashCommandClasses = assembly.GetTypes()
                     .SelectMany(t => t.GetMethods(),
                                 (t, m) => new { Type = t, Method = m, Attributes = m.GetCustomAttributes(typeof(SlashCommandAttribute), true) })
-                    .Where(x => x.Attributes.Any())
+                    .Where(x => x.Attributes.Any() && !x.Type.Name.Equals("DiscSlashCommand"))
                     .ToList();
 
     Console.WriteLine($"[info] {slashCommandClasses.Count} slash command modules loaded:");
