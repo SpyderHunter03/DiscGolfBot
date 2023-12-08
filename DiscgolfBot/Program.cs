@@ -1,6 +1,7 @@
 ﻿/* This is the cancellation token we'll use to end the bot if needed(used for most async stuff). */
 using DiscgolfBot.Data;
 using DiscgolfBot.Services;
+using DiscgolfBot.SlashCommands.DiscCommands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.SlashCommands;
@@ -113,6 +114,7 @@ void SetupSlashCommands(ServiceProvider services)
     //await _discord.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
     //await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, Array.Empty<DiscordApplicationCommand>());
 
+    slashCommands.RegisterCommands<DiscSlashCommand>();
 
     var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
     ulong? slashCommandsGuildId = (environmentName?.ToLower().Equals("Development".ToLower()) ?? false) ?
