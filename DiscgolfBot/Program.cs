@@ -1,10 +1,7 @@
 ﻿/* This is the cancellation token we'll use to end the bot if needed(used for most async stuff). */
 using DiscgolfBot.Data;
 using DiscgolfBot.Services;
-using DiscgolfBot.SlashCommands.DiscCommands;
 using DSharpPlus;
-using DSharpPlus.CommandsNext;
-using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.EventArgs;
 using Microsoft.Extensions.Configuration;
@@ -74,7 +71,7 @@ async Task RunAsync()
     Console.WriteLine("Connecting..");
     await _discord.ConnectAsync();
     Console.WriteLine("Connected!");
-    await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, new List<DiscordApplicationCommand>());
+
     // Keep the bot running until the cancellation token requests we stop
     while (!_cts.IsCancellationRequested)
         await Task.Delay(TimeSpan.FromMinutes(1));
@@ -93,19 +90,15 @@ async Task SetupSlashCommands(ServiceProvider services)
     var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
     var isDevelopment = environmentName?.ToLower().Equals("Development".ToLower()) ?? false;
     var assembly = Assembly.GetExecutingAssembly();
-    //await _discord.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
     
     ulong? slashCommandsGuildId = null;
     if (isDevelopment)
     {
         slashCommandsGuildId = 1037730809244823592;
-        slashCommands.RegisterCommands<ApplicationCommandModule>(slashCommandsGuildId.Value);
         slashCommands.RegisterCommands(assembly, slashCommandsGuildId.Value);
     }
     else
     {
-        slashCommands.RegisterCommands<ApplicationCommandModule>();
-        slashCommands.RegisterCommands<ApplicationCommandModule>(1037730809244823592);
         slashCommands.RegisterCommands(assembly);
     }
 
