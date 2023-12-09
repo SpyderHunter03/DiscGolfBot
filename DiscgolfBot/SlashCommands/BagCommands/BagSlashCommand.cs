@@ -19,10 +19,10 @@ namespace DiscgolfBot.SlashCommands.BagCommands
         public async Task Command(InteractionContext ctx,
             [Option("user", "Bag Owner")] DiscordUser? user = null)
         {
-            var userName = (user != null ? await ctx.Guild.GetMemberAsync(user.Id) : ctx.Member).DisplayName;
+            var userName = (user as DiscordMember)?.DisplayName ?? ctx.Member.DisplayName;
 
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
-                new DiscordInteractionResponseBuilder().WithContent($"{ctx.Member.DisplayName} called /bag {(user != null ? userName : "")}")
+                new DiscordInteractionResponseBuilder().WithContent($"{ctx.Member.DisplayName} called /bag {(user as DiscordMember)?.DisplayName ?? ""}")
             );
 
             try
