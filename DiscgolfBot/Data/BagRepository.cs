@@ -1,6 +1,8 @@
 ﻿using Dapper;
 using DiscgolfBot.Data.Models;
 using MySql.Data.MySqlClient;
+using System.Linq;
+using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
 
 namespace DiscgolfBot.Data
 {
@@ -20,6 +22,40 @@ namespace DiscgolfBot.Data
             using var connection = new MySqlConnection(_connectionString);
             var baggedDiscs = await connection.QueryAsync<BaggedDisc>(query, new { userId });
             return baggedDiscs;
+        }
+
+        public async Task<BaggedDiscs?> GetBaggedDiscsUpgraded(ulong userId, int multiBagNumber = 0)
+        {
+            var query = @"
+                SELECT 
+                    b.*,
+                    (SELECT discs.name FROM discs WHERE discs.id = b.putterId) putterName,
+                    d.* 
+                FROM bag b
+                INNER JOIN discs d ON b.DiscId = d.Id
+                WHERE b.userId = @userId AND b.multiBagNumber = @multiBagNumber";
+
+            var lookup = new Dictionary<int, BaggedDiscs>();
+            using var connection = new MySqlConnection(_connectionString);
+
+            var result = await connection.QueryAsync<BaggedDiscs, Disc, BaggedDiscs>(
+                query,
+                (b, d) =>
+                {
+                    if (!lookup.TryGetValue(b.MultiBagNumber, out var baggedDisc))
+                        lookup.Add(b.MultiBagNumber, baggedDisc = b);
+
+                    baggedDisc.Discs ??= new List<Disc>();
+                    baggedDisc.Discs.Add(d); /* Add discs to bag */
+
+                    return baggedDisc;
+                },
+                new { userId, multiBagNumber }
+                //splitOn: "Id" // Adjust this to the name of the first column of the second object (Disc in this case)
+            );
+
+            lookup.TryGetValue(multiBagNumber, out var retval);
+            return retval;
         }
 
         public async Task<Disc> AddDiscToBag(ulong userId, int discId, int multibagnumber = 0)

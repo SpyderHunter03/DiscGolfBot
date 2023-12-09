@@ -55,7 +55,7 @@ try
 
     //SetupCommands(_config);
     
-    await SetupSlashCommands(services);
+    SetupSlashCommands(services);
 
     RunAsync().Wait();
 }
@@ -77,7 +77,7 @@ async Task RunAsync()
         await Task.Delay(TimeSpan.FromMinutes(1));
 }
 
-async Task SetupSlashCommands(ServiceProvider services)
+void SetupSlashCommands(ServiceProvider services)
 {
     var slashCommands = _discord.UseSlashCommands(new SlashCommandsConfiguration
     {
@@ -86,6 +86,7 @@ async Task SetupSlashCommands(ServiceProvider services)
 
     slashCommands.SlashCommandErrored += SlashCommandErrored;
     slashCommands.AutocompleteErrored += AutocompleteErrored;
+
     Console.WriteLine("[info] Loading slash command modules..");
     var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
     var isDevelopment = environmentName?.ToLower().Equals("Development".ToLower()) ?? false;
@@ -113,34 +114,8 @@ async Task SetupSlashCommands(ServiceProvider services)
         Console.WriteLine($"\t[info] {slashCommand.Type.Name} module loaded for {(isDevelopment && slashCommandsGuildId.HasValue ? $"guild {slashCommandsGuildId.Value}" : "all guilds")}");
 }
 
-async Task AutocompleteErrored(SlashCommandsExtension s, AutocompleteErrorEventArgs e)
-{
+async Task AutocompleteErrored(SlashCommandsExtension s, AutocompleteErrorEventArgs e) =>
     Console.WriteLine($"Autocomplete errored: {e.Exception.Message}");
-}
 
-async Task SlashCommandErrored(SlashCommandsExtension s, SlashCommandErrorEventArgs e)
-{
+async Task SlashCommandErrored(SlashCommandsExtension s, SlashCommandErrorEventArgs e) =>
     Console.WriteLine($"Slash command errored: {e.Exception.Message}");
-}
-
-//void SetupCommands(IConfigurationRoot _config)
-//{
-//    var prefixConfiguration = _config.GetValue<string>("discord:commandPrefix") ??
-//        throw new InvalidDataException("No Discord:commandPrefix value");
-
-//    var prefixes = prefixConfiguration.ToCharArray().Select(c => $"{c}");
-//    Console.WriteLine($"[info] Command prefixes: {string.Join(',', prefixes)}");
-
-//    // Build dependancies and then create the commands module.
-//    var commands = _discord.UseCommandsNext(new CommandsNextConfiguration
-//    {
-//        StringPrefixes = prefixes, // Load the command prefix(what comes before the command, eg "!" or "/") from our config file
-//    });
-
-//    // Add command loading
-//    Console.WriteLine("[info] Loading command modules..");
-
-//    commands.RegisterCommands(Assembly.GetExecutingAssembly());
-
-//    Console.WriteLine($"[info] {commands.RegisteredCommands.Count} command modules loaded");
-//}
