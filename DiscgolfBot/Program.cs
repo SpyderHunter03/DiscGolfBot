@@ -4,6 +4,7 @@ using DiscgolfBot.Services;
 using DiscgolfBot.SlashCommands.DiscCommands;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.EventArgs;
 using Microsoft.Extensions.Configuration;
@@ -57,7 +58,7 @@ try
 
     //SetupCommands(_config);
     
-    SetupSlashCommands(services);
+    await SetupSlashCommands(services);
 
     RunAsync().Wait();
 }
@@ -79,29 +80,7 @@ async Task RunAsync()
         await Task.Delay(TimeSpan.FromMinutes(1));
 }
 
-void SetupCommands(IConfigurationRoot _config)
-{
-    var prefixConfiguration = _config.GetValue<string>("discord:commandPrefix") ??
-        throw new InvalidDataException("No Discord:commandPrefix value");
-
-    var prefixes = prefixConfiguration.ToCharArray().Select(c => $"{c}");
-    Console.WriteLine($"[info] Command prefixes: {string.Join(',', prefixes)}");
-
-    // Build dependancies and then create the commands module.
-    var commands = _discord.UseCommandsNext(new CommandsNextConfiguration
-    {
-        StringPrefixes = prefixes, // Load the command prefix(what comes before the command, eg "!" or "/") from our config file
-    });
-
-    // Add command loading
-    Console.WriteLine("[info] Loading command modules..");
-
-    commands.RegisterCommands(Assembly.GetExecutingAssembly());
-
-    Console.WriteLine($"[info] {commands.RegisteredCommands.Count} command modules loaded");
-}
-
-void SetupSlashCommands(ServiceProvider services)
+async Task SetupSlashCommands(ServiceProvider services)
 {
     var slashCommands = _discord.UseSlashCommands(new SlashCommandsConfiguration
     {
@@ -115,7 +94,7 @@ void SetupSlashCommands(ServiceProvider services)
     var isDevelopment = environmentName?.ToLower().Equals("Development".ToLower()) ?? false;
     var assembly = Assembly.GetExecutingAssembly();
     //await _discord.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
-    //await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, Array.Empty<DiscordApplicationCommand>());
+    await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, new List<DiscordApplicationCommand>());
     ulong? slashCommandsGuildId = null;
     if (isDevelopment)
     {
@@ -150,3 +129,25 @@ async Task SlashCommandErrored(SlashCommandsExtension s, SlashCommandErrorEventA
 {
     Console.WriteLine($"Slash command errored: {e.Exception.Message}");
 }
+
+//void SetupCommands(IConfigurationRoot _config)
+//{
+//    var prefixConfiguration = _config.GetValue<string>("discord:commandPrefix") ??
+//        throw new InvalidDataException("No Discord:commandPrefix value");
+
+//    var prefixes = prefixConfiguration.ToCharArray().Select(c => $"{c}");
+//    Console.WriteLine($"[info] Command prefixes: {string.Join(',', prefixes)}");
+
+//    // Build dependancies and then create the commands module.
+//    var commands = _discord.UseCommandsNext(new CommandsNextConfiguration
+//    {
+//        StringPrefixes = prefixes, // Load the command prefix(what comes before the command, eg "!" or "/") from our config file
+//    });
+
+//    // Add command loading
+//    Console.WriteLine("[info] Loading command modules..");
+
+//    commands.RegisterCommands(Assembly.GetExecutingAssembly());
+
+//    Console.WriteLine($"[info] {commands.RegisteredCommands.Count} command modules loaded");
+//}
