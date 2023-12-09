@@ -74,7 +74,7 @@ async Task RunAsync()
     Console.WriteLine("Connecting..");
     await _discord.ConnectAsync();
     Console.WriteLine("Connected!");
-
+    await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, new List<DiscordApplicationCommand>());
     // Keep the bot running until the cancellation token requests we stop
     while (!_cts.IsCancellationRequested)
         await Task.Delay(TimeSpan.FromMinutes(1));
@@ -94,7 +94,7 @@ async Task SetupSlashCommands(ServiceProvider services)
     var isDevelopment = environmentName?.ToLower().Equals("Development".ToLower()) ?? false;
     var assembly = Assembly.GetExecutingAssembly();
     //await _discord.BulkOverwriteGlobalApplicationCommandsAsync(Array.Empty<DiscordApplicationCommand>());
-    await _discord.BulkOverwriteGuildApplicationCommandsAsync(1037730809244823592, new List<DiscordApplicationCommand>());
+    
     ulong? slashCommandsGuildId = null;
     if (isDevelopment)
     {
