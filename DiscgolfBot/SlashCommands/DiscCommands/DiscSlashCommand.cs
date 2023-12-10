@@ -22,10 +22,16 @@ namespace DiscgolfBot.SlashCommands.DiscCommands
             try
             {
                 var disc = await _discRespository.GetDisc(discName);
+                if (disc == null)
+                {
+                    await ctx.Channel.SendMessageAsync(GetFailedQueryEmbed(discName));
+                    return;
+                }
 
-                var embed = disc != null ? GetDiscEmbed(disc) : GetFailedQueryEmbed(discName);
+                var manufacturer = await _discRespository.GetManufacturer(disc.ManufacturerId);
+                await ctx.Channel.SendMessageAsync(GetDiscEmbed(disc, manufacturer.Name));
 
-                await ctx.Channel.SendMessageAsync(embed);
+                
             }
             catch (Exception ex)
             {
@@ -33,10 +39,10 @@ namespace DiscgolfBot.SlashCommands.DiscCommands
             }
         }
 
-        protected static DiscordEmbed GetDiscEmbed(Disc disc) =>
+        protected static DiscordEmbed GetDiscEmbed(Disc disc, string manufacturer) =>
             new DiscordEmbedBuilder()
                     .WithTitle(disc.Name)
-                    .WithDescription($"{disc.Manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}\n[PDGA](https://www.pdga.com/technical-standards/equipment-certification/discs/{disc.Name})")
+                    .WithDescription($"{manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}\n[PDGA](https://www.pdga.com/technical-standards/equipment-certification/discs/{disc.Name})")
                     .WithColor(DiscordColor.Azure)
                     .Build();
 

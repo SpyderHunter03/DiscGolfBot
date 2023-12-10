@@ -2,6 +2,7 @@
 using DiscgolfBot.Data;
 using DiscgolfBot.Services;
 using DSharpPlus;
+using DSharpPlus.Exceptions;
 using DSharpPlus.SlashCommands;
 using DSharpPlus.SlashCommands.EventArgs;
 using Microsoft.Extensions.Configuration;
@@ -114,8 +115,20 @@ void SetupSlashCommands(ServiceProvider services)
         Console.WriteLine($"\t[info] {slashCommand.Type.Name} module loaded for {(isDevelopment && slashCommandsGuildId.HasValue ? $"guild {slashCommandsGuildId.Value}" : "all guilds")}");
 }
 
-async Task AutocompleteErrored(SlashCommandsExtension s, AutocompleteErrorEventArgs e) =>
-    Console.WriteLine($"Autocomplete errored: {e.Exception.Message}");
+async Task AutocompleteErrored(SlashCommandsExtension s, AutocompleteErrorEventArgs e)
+{
+    switch(e.Exception.GetType().ToString())
+    {
+        case "DSharpPlus.Exceptions.BadRequestException":
+            Console.WriteLine($"Autocomplete errored: {(e.Exception as BadRequestException)?.JsonMessage}");
+            Console.WriteLine($"Autocomplete errored: {(e.Exception as BadRequestException)?.Errors}");
+            break;
+        default:
+            Console.WriteLine($"Autocomplete errored: {e.Exception.Message}");
+            break;
+    }
+}
+    
 
 async Task SlashCommandErrored(SlashCommandsExtension s, SlashCommandErrorEventArgs e) =>
     Console.WriteLine($"Slash command errored: {e.Exception.Message}");

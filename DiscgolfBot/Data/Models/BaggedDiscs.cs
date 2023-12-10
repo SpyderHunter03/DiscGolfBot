@@ -8,7 +8,8 @@
         public string? BagName { get; set; }
         public string? BagPhoto { get; set; }
         public int? PutterId { get; set; }
-        public string? PutterName { get; set; }
-        public IList<Disc> Discs { get; set; }
+        public DiscDetails? Putter { get; set; }
+        //public string? PutterName { get; set; }
+        public IList<DiscDetails> Discs { get; set; }
     }
 }

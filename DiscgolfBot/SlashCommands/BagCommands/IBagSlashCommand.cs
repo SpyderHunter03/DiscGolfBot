@@ -2,6 +2,7 @@
 using DiscgolfBot.Data;
 using DiscgolfBot.Data.Models;
 using DiscgolfBot.Services;
+using DiscgolfBot.SlashCommands.ChoiceProviders;
 using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
@@ -15,9 +16,8 @@ namespace DiscgolfBot.SlashCommands.BagCommands
         public IErrorService _errorService { private get; set; } // The get accessor is optionally public, but the set accessor must be public.
 
         [SlashCommand("ibag", "Add/Remove disc to/from bag")]
-        [RequireAdmin]
         public async Task Command(InteractionContext ctx,
-            [Option("name", "Disc Name")] string discName)
+            [Autocomplete(typeof(DiscChoiceProvider))] [Option("name", "Disc Name")] string discName)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().WithContent($"{ctx.Member.DisplayName} called /ibag {discName}")
@@ -33,15 +33,15 @@ namespace DiscgolfBot.SlashCommands.BagCommands
                 }
 
                 var baggedDiscs = await _bagRespository.GetBaggedDiscs(ctx.Member.Id);
-                var baggedDisc = baggedDiscs.FirstOrDefault(bd => bd.DiscId == disc.Id);
+                var baggedDisc = baggedDiscs.Discs.FirstOrDefault(bd => bd.Id == disc.Id);
                 if (baggedDisc == null)
                 {
-                    var insertedDiscIntoBag = await _bagRespository.AddDiscToBag(ctx.Member.Id, disc.Id);
+                    var insertedDiscIntoBag = await _bagRespository.AddDiscToBag(disc.Id, baggedDiscs.Id);
                     await ctx.Channel.SendMessageAsync(GetAddedToBagEmbed(disc));
                     return;
                 }
 
-                var isDiscRemovedFromBag = await _bagRespository.RemoveDiscFromBag(baggedDisc.Id);
+                var isDiscRemovedFromBag = await _bagRespository.RemoveDiscFromBag(baggedDisc.Id, baggedDiscs.Id);
                 await ctx.Channel.SendMessageAsync(GetRemovedFromBagEmbed(disc));
                 return;
             }

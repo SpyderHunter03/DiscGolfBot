@@ -38,10 +38,10 @@ namespace DiscgolfBot.SlashCommands.DiscCommands
             }
         }
 
-        protected static DiscordEmbed GetDiscEmbed(Disc disc) =>
+        protected static DiscordEmbed GetDiscEmbed(Disc disc, string manufacturer) =>
             new DiscordEmbedBuilder()
                     .WithTitle(disc.Name)
-                    .WithDescription($"{disc.Manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}\n[PDGA](https://www.pdga.com/technical-standards/equipment-certification/discs/{disc.Name})")
+                    .WithDescription($"{manufacturer}\n{disc.Speed}, {disc.Glide}, {disc.Turn}, {disc.Fade}\n[PDGA](https://www.pdga.com/technical-standards/equipment-certification/discs/{disc.Name})")
                     .WithColor(DiscordColor.Azure)
                     .Build();
 

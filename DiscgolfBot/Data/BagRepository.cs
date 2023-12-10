@@ -1,8 +1,6 @@
 ﻿using Dapper;
 using DiscgolfBot.Data.Models;
 using MySql.Data.MySqlClient;
-using System.Linq;
-using static Google.Protobuf.Reflection.SourceCodeInfo.Types;
 
 namespace DiscgolfBot.Data
 {
@@ -15,54 +13,70 @@ namespace DiscgolfBot.Data
             _connectionString = connectionString;
         }
 
-        public async Task<IEnumerable<BaggedDisc>> GetBaggedDiscs(ulong userId)
+        public async Task<IEnumerable<Bag>> GetBags(ulong userId)
         {
             var query = "SELECT * FROM bag WHERE userId = @userId";
 
             using var connection = new MySqlConnection(_connectionString);
-            var baggedDiscs = await connection.QueryAsync<BaggedDisc>(query, new { userId });
+            var baggedDiscs = await connection.QueryAsync<Bag>(query, new { userId });
             return baggedDiscs;
         }
 
-        public async Task<BaggedDiscs?> GetBaggedDiscsUpgraded(ulong userId, int multiBagNumber = 0)
+        public async Task<BaggedDiscs?> GetBaggedDiscs(ulong userId, int multiBagNumber = 0)
         {
             var query = @"
-                SELECT 
+                SELECT
                     b.*,
-                    (SELECT discs.name FROM discs WHERE discs.id = b.putterId) putterName,
-                    d.* 
-                FROM bag b
-                INNER JOIN discs d ON b.DiscId = d.Id
+                    d.*, m.name AS ManufacturerName,
+                    p.*, pm.name AS PutterManufacturerName
+                FROM baggeddiscs bd
+                INNER JOIN bag b ON b.id = bd.bagId 
+                INNER JOIN discs d ON d.id = bd.discId
+                INNER JOIN manufacturers m ON m.id = d.manufacturerId
+                LEFT JOIN discs p ON p.id = b.putterId
+                LEFT JOIN manufacturers pm ON pm.id = p.manufacturerId
                 WHERE b.userId = @userId AND b.multiBagNumber = @multiBagNumber";
 
-            var lookup = new Dictionary<int, BaggedDiscs>();
+            BaggedDiscs? baggedDiscs = null;
             using var connection = new MySqlConnection(_connectionString);
 
-            var result = await connection.QueryAsync<BaggedDiscs, Disc, BaggedDiscs>(
+            await connection.QueryAsync<BaggedDiscs, DiscDetails, PutterDetails, BaggedDiscs>(
                 query,
-                (b, d) =>
+                (bag, disc, putter) =>
                 {
-                    if (!lookup.TryGetValue(b.MultiBagNumber, out var baggedDisc))
-                        lookup.Add(b.MultiBagNumber, baggedDisc = b);
+                    if (baggedDiscs == null || baggedDiscs.Id != bag.Id)
+                    {
+                        baggedDiscs = bag;
+                        baggedDiscs.Discs = new List<DiscDetails>();
+                    }
 
-                    baggedDisc.Discs ??= new List<Disc>();
-                    baggedDisc.Discs.Add(d); /* Add discs to bag */
+                    if (bag.PutterId.HasValue && putter != null && baggedDiscs.Putter == null)
+                    {
+                        putter.ManufacturerName = putter.PutterManufacturerName;
+                        baggedDiscs.Putter = putter;
+                    }
 
-                    return baggedDisc;
+                    baggedDiscs.Discs.Add(disc);
+
+                    return baggedDiscs;
                 },
-                new { userId, multiBagNumber }
-                //splitOn: "Id" // Adjust this to the name of the first column of the second object (Disc in this case)
+                new { userId, multiBagNumber },
+                splitOn: "Id,Id,Id"
             );
 
-            lookup.TryGetValue(multiBagNumber, out var retval);
-            return retval;
+            return baggedDiscs;
         }
 
-        public async Task<Disc> AddDiscToBag(ulong userId, int discId, int multibagnumber = 0)
+        private class PutterDetails : DiscDetails
         {
-            var insertQuery = $"INSERT INTO bag (userId, discId, multibagnumber) VALUES (@userId, @discId, @multibagnumber)";
-            var selectQuery = $"SELECT * FROM bag WHERE userId = @userId AND discId = @discId";
-            var param = new { userId, discId, multibagnumber };
+            public string PutterManufacturerName { get; set; }
+        }
+
+        public async Task<Disc> AddDiscToBag(int discId, int bagId)
+        {
+            var insertQuery = $"INSERT INTO baggeddiscs (discId, bagId) VALUES (@discId, @bagId)";
+            var selectQuery = $"SELECT * FROM discs WHERE id = @discId";
+            var param = new { discId, bagId };
 
             using var connection = new MySqlConnection(_connectionString);
             var rowsAffected = await connection.ExecuteAsync(insertQuery, param);
@@ -70,12 +84,12 @@ namespace DiscgolfBot.Data
             return insertedBaggedDisc;
         }
 
-        public async Task<bool> RemoveDiscFromBag(int bagId)
+        public async Task<bool> RemoveDiscFromBag(int discId, int bagId)
         {
-            var deleteQuery = $"DELETE FROM bag WHERE id = @bagId";
+            var deleteQuery = $"DELETE FROM baggeddiscs WHERE discid = @discId AND bagid = @bagId";
 
             using var connection = new MySqlConnection(_connectionString);
-            var rowsAffected = await connection.ExecuteAsync(deleteQuery, new { bagId });
+            var rowsAffected = await connection.ExecuteAsync(deleteQuery, new { discId, bagId });
 
             return rowsAffected > 0;
         }
