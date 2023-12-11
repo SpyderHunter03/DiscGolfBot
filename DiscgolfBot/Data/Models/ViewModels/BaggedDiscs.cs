@@ -1,4 +1,4 @@
-﻿namespace DiscgolfBot.Data.Models
+﻿namespace DiscgolfBot.Data.Models.ViewModels
 {
     public class BaggedDiscs
     {

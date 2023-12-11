@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using DiscgolfBot.Data.Models;
+using DiscgolfBot.Data.Models.ViewModels;
 using MySql.Data.MySqlClient;
 using System;
 
@@ -116,6 +117,78 @@ namespace DiscgolfBot.Data
             using var connection = new MySqlConnection(_connectionString);
             var rowsAffected = await connection.ExecuteAsync(insertQuery, new { manufacturerName });
             return await GetManufacturer(manufacturerName);
+        }
+
+        public async Task<IEnumerable<DiscPlasticDetails>> GetPlastics()
+        {
+            var query = "SELECT p.*, m.name AS manufacturerName FROM plastics p INNER JOIN manufacturers m ON m.id = p.manufacturerId";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var plastics = await connection.QueryAsync<DiscPlasticDetails>(query);
+            return plastics;
+        }
+
+        public async Task<IEnumerable<DiscPlasticDetails>> GetPlastics(int manufacturerId)
+        {
+            var query = "SELECT p.*, m.name AS manufacturerName FROM plastics p INNER JOIN manufacturers m ON m.id = p.manufacturerId WHERE p.manufacturerId = @manufacturerId";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var plastics = await connection.QueryAsync<DiscPlasticDetails>(query, new { manufacturerId });
+            return plastics;
+        }
+
+        public async Task<IEnumerable<DiscPlasticDetails>> GetPlastics(string manufacturerName)
+        {
+            var query = "SELECT p.*, m.name AS manufacturerName FROM plastics p INNER JOIN manufacturers m ON m.id = p.manufacturerId WHERE m.name = @manufacturerName";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var plastics = await connection.QueryAsync<DiscPlasticDetails>(query, new { manufacturerName });
+            return plastics;
+        }
+
+        public async Task<DiscPlasticDetails?> GetPlastic(int plasticId)
+        {
+            var query = "SELECT p.*, m.name AS manufacturerName FROM plastics p INNER JOIN manufacturers m ON m.id = p.manufacturerId WHERE id = @plasticId";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var plastic = await connection.QuerySingleOrDefaultAsync<DiscPlasticDetails>(query, new { plasticId });
+            return plastic;
+        }
+
+        public async Task<IEnumerable<DiscPlasticDetails>?> GetPlastic(string plasticName)
+        {
+            var query = "SELECT p.*, m.name AS manufacturerName FROM plastics p INNER JOIN manufacturers m ON m.id = p.manufacturerId WHERE LOWER(p.name) = @plasticName";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var plastic = await connection.QueryAsync<DiscPlasticDetails>(query, new { plasticName = plasticName.ToLower() });
+            return plastic;
+        }
+
+        public async Task<DiscPlasticDetails?> GetPlastic(string plasticName, string manufacturerName)
+        {
+            var query = "SELECT p.*, m.name AS manufacturerName FROM plastics p INNER JOIN manufacturers m ON m.id = p.manufacturerId WHERE LOWER(p.name) = @plasticName AND LOWER(m.name) = @manufacturerName";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var plastic = await connection.QuerySingleOrDefaultAsync<DiscPlasticDetails>(query, new { plasticName = plasticName.ToLower(), manufacturerName = manufacturerName.ToLower() });
+            return plastic;
+        }
+
+        public async Task<DiscPlasticDetails?> GetPlastic(string plasticName, int manufacturerid)
+        {
+            var query = "SELECT p.*, m.name AS manufacturerName FROM plastics p INNER JOIN manufacturers m ON m.id = p.manufacturerId WHERE LOWER(p.name) = @plasticName AND p.manufacturerId = @manufacturerId";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var plastic = await connection.QuerySingleOrDefaultAsync<DiscPlasticDetails>(query, new { plasticName = plasticName.ToLower(), manufacturerid });
+            return plastic;
+        }
+
+        public async Task<DiscPlasticDetails?> AddPlastic(int manufacturerId, string plasticName)
+        {
+            var insertQuery = $"INSERT INTO plastics (manufacturerId, name) VALUES (@manufacturerId, @plasticName)";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var rowsAffected = await connection.ExecuteAsync(insertQuery, new { manufacturerId, plasticName });
+            return await GetPlastic(plasticName, manufacturerId);
         }
     }
 }

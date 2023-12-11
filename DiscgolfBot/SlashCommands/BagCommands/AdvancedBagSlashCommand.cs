@@ -1,5 +1,5 @@
 ﻿using DiscgolfBot.Data;
-using DiscgolfBot.Data.Models;
+using DiscgolfBot.Data.Models.ViewModels;
 using DiscgolfBot.Services;
 using DSharpPlus;
 using DSharpPlus.Entities;
@@ -9,7 +9,6 @@ namespace DiscgolfBot.SlashCommands.BagCommands
 {
     public class AdvancedBagSlashCommand : ApplicationCommandModule
     {
-        public IDiscRepository _discRespository { private get; set; } // The get accessor is optionally public, but the set accessor must be public.
         public IBagRepository _bagRespository { private get; set; } // The get accessor is optionally public, but the set accessor must be public.
         public IErrorService _errorService { private get; set; } // The get accessor is optionally public, but the set accessor must be public.
 

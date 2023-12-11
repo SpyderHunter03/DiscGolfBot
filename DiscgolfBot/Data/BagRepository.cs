@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using DiscgolfBot.Data.Models;
+using DiscgolfBot.Data.Models.ViewModels;
 using MySql.Data.MySqlClient;
 
 namespace DiscgolfBot.Data

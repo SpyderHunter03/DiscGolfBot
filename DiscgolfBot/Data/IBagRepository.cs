@@ -1,4 +1,5 @@
 ﻿using DiscgolfBot.Data.Models;
+using DiscgolfBot.Data.Models.ViewModels;
 
 namespace DiscgolfBot.Data
 {
