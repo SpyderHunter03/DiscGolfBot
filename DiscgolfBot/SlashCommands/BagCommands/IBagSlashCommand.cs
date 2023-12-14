@@ -25,6 +25,8 @@ namespace DiscgolfBot.SlashCommands.BagCommands
 
             try
             {
+                var userId = ctx.Member.Id;
+
                 var disc = await _discRespository.GetDisc(discName);
                 if (disc == null)
                 {
@@ -32,11 +34,21 @@ namespace DiscgolfBot.SlashCommands.BagCommands
                     return;
                 }
 
-                var baggedDiscs = await _bagRespository.GetBaggedDiscs(ctx.Member.Id);
-                var baggedDisc = baggedDiscs.Discs.FirstOrDefault(bd => bd.Id == disc.Id);
+                var bags = await _bagRespository.GetBags(userId);
+                var bag = bags?.FirstOrDefault(b => b.MultiBagNumber == 0);
+                if (bag == null)
+                {
+                    bag = await _bagRespository.CreateBag(userId);
+                    var insertedDiscIntoBag = await _bagRespository.AddDiscToBag(disc.Id, bag.Id);
+                    await ctx.Channel.SendMessageAsync(GetAddedToBagEmbed(disc));
+                    return;
+                }
+
+                var baggedDiscs = await _bagRespository.GetBaggedDiscs(bag.Id);
+                var baggedDisc = baggedDiscs?.Discs?.FirstOrDefault(bd => bd.Id == disc.Id);
                 if (baggedDisc == null)
                 {
-                    var insertedDiscIntoBag = await _bagRespository.AddDiscToBag(disc.Id, baggedDiscs.Id);
+                    var insertedDiscIntoBag = await _bagRespository.AddDiscToBag(disc.Id, bag.Id);
                     await ctx.Channel.SendMessageAsync(GetAddedToBagEmbed(disc));
                     return;
                 }

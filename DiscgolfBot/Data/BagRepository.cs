@@ -24,6 +24,51 @@ namespace DiscgolfBot.Data
             return baggedDiscs;
         }
 
+        public async Task<BaggedDiscs?> GetBaggedDiscs(int bagId)
+        {
+            var query = @"
+                SELECT
+                    b.*,
+                    d.*, m.name AS ManufacturerName,
+                    p.*, pm.name AS PutterManufacturerName
+                FROM baggeddiscs bd
+                INNER JOIN bag b ON b.id = bd.bagId 
+                INNER JOIN discs d ON d.id = bd.discId
+                INNER JOIN manufacturers m ON m.id = d.manufacturerId
+                LEFT JOIN discs p ON p.id = b.putterId
+                LEFT JOIN manufacturers pm ON pm.id = p.manufacturerId
+                WHERE b.id = @bagId";
+
+            BaggedDiscs? baggedDiscs = null;
+            using var connection = new MySqlConnection(_connectionString);
+
+            await connection.QueryAsync<BaggedDiscs, DiscDetails, PutterDetails, BaggedDiscs>(
+                query,
+                (bag, disc, putter) =>
+                {
+                    if (baggedDiscs == null || baggedDiscs.Id != bag.Id)
+                    {
+                        baggedDiscs = bag;
+                        baggedDiscs.Discs = new List<DiscDetails>();
+                    }
+
+                    if (bag.PutterId.HasValue && putter != null && baggedDiscs.Putter == null)
+                    {
+                        putter.ManufacturerName = putter.PutterManufacturerName;
+                        baggedDiscs.Putter = putter;
+                    }
+
+                    baggedDiscs.Discs.Add(disc);
+
+                    return baggedDiscs;
+                },
+                new { bagId },
+                splitOn: "Id,Id,Id"
+            );
+
+            return baggedDiscs;
+        }
+
         public async Task<BaggedDiscs?> GetBaggedDiscs(ulong userId, int multiBagNumber = 0)
         {
             var query = @"
