@@ -2,6 +2,7 @@
 using DiscgolfBot.Data.Models;
 using DiscgolfBot.Data.Models.ViewModels;
 using MySql.Data.MySqlClient;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DiscgolfBot.Data
 {
@@ -73,6 +74,18 @@ namespace DiscgolfBot.Data
             public string PutterManufacturerName { get; set; }
         }
 
+        public async Task<Bag> CreateBag(ulong userId)
+        {
+            var insertQuery = $"INSERT INTO bag (userId, multiBagNumber) VALUES (@userId, 0)";
+            var selectQuery = $"SELECT * FROM bag WHERE userId = @userId AND multiBagNumber = 0";
+            var param = new { userId };
+
+            using var connection = new MySqlConnection(_connectionString);
+            var rowsAffected = await connection.ExecuteAsync(insertQuery, param);
+            var insertedBag = await connection.QuerySingleAsync<Bag>(selectQuery, param);
+            return insertedBag;
+        }
+
         public async Task<Disc> AddDiscToBag(int discId, int bagId)
         {
             var insertQuery = $"INSERT INTO baggeddiscs (discId, bagId) VALUES (@discId, @bagId)";
@@ -93,6 +106,18 @@ namespace DiscgolfBot.Data
             var rowsAffected = await connection.ExecuteAsync(deleteQuery, new { discId, bagId });
 
             return rowsAffected > 0;
+        }
+
+        public async Task<Bag> UpdatePutter(int bagId, int putterId)
+        {
+            var updateQuery = $"UPDATE bag SET putterId = @putterId WHERE id = @bagId";
+            var selectQuery = $"SELECT * FROM bag WHERE id = @bagId";
+            var param = new { putterId, bagId };
+
+            using var connection = new MySqlConnection(_connectionString);
+            var rowsAffected = await connection.ExecuteAsync(updateQuery, param);
+            var updatedBag = await connection.QuerySingleAsync<Bag>(selectQuery, param);
+            return updatedBag;
         }
     }
 }
