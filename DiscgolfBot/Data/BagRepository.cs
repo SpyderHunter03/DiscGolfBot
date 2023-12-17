@@ -24,6 +24,50 @@ namespace DiscgolfBot.Data
             return baggedDiscs;
         }
 
+        public async Task<IEnumerable<BaggedDiscs>?> GetBaggedDiscs()
+        {
+            var query = @"
+                SELECT
+                    b.*,
+                    d.*, m.name AS ManufacturerName,
+                    p.*, pm.name AS PutterManufacturerName
+                FROM baggeddiscs bd
+                INNER JOIN bag b ON b.id = bd.bagId 
+                INNER JOIN discs d ON d.id = bd.discId
+                INNER JOIN manufacturers m ON m.id = d.manufacturerId
+                LEFT JOIN discs p ON p.id = b.putterId
+                LEFT JOIN manufacturers pm ON pm.id = p.manufacturerId";
+
+            var bagLookup = new Dictionary<int, BaggedDiscs>();
+            using var connection = new MySqlConnection(_connectionString);
+
+            await connection.QueryAsync<BaggedDiscs, DiscDetails, PutterDetails, BaggedDiscs>(
+                query,
+                (bag, disc, putter) =>
+                {
+                    if (!bagLookup.TryGetValue(bag.Id, out var baggedDiscs))
+                    {
+                        baggedDiscs = bag;
+                        baggedDiscs.Discs = new List<DiscDetails>();
+                        bagLookup.Add(bag.Id, baggedDiscs);
+                    }
+
+                    if (bag.PutterId.HasValue && putter != null && baggedDiscs.Putter == null)
+                    {
+                        putter.ManufacturerName = putter.PutterManufacturerName;
+                        baggedDiscs.Putter = putter;
+                    }
+
+                    baggedDiscs.Discs.Add(disc);
+
+                    return baggedDiscs;
+                },
+                splitOn: "Id,Id,Id"
+            );
+
+            return bagLookup.Values;
+        }
+
         public async Task<BaggedDiscs?> GetBaggedDiscs(int bagId)
         {
             var query = @"
@@ -149,6 +193,16 @@ namespace DiscgolfBot.Data
 
             using var connection = new MySqlConnection(_connectionString);
             var rowsAffected = await connection.ExecuteAsync(deleteQuery, new { discId, bagId });
+
+            return rowsAffected > 0;
+        }
+
+        public async Task<bool> RemoveAllDiscsFromBag(int bagId)
+        {
+            var deleteQuery = $"DELETE FROM baggeddiscs WHERE bagid = @bagId";
+
+            using var connection = new MySqlConnection(_connectionString);
+            var rowsAffected = await connection.ExecuteAsync(deleteQuery, new { bagId });
 
             return rowsAffected > 0;
         }

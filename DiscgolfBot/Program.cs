@@ -35,6 +35,7 @@ try
         .AddScoped<IDiscRepository, DiscRepository>(dr => new DiscRepository(_config.GetConnectionString("Database")!))
         .AddScoped<IUserRepository, UserRepository>(dr => new UserRepository(_config.GetConnectionString("Database")!))
         .AddScoped<IBagRepository, BagRepository>(dr => new BagRepository(_config.GetConnectionString("Database")!))
+        .AddScoped<IAdminRepository, AdminRepository>(dr => new AdminRepository(_config.GetConnectionString("Database")!))
         .AddScoped<IErrorService, ErrorService>()
         .BuildServiceProvider();
 

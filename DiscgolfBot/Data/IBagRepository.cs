@@ -6,8 +6,10 @@ namespace DiscgolfBot.Data
     public interface IBagRepository
     {
         Task<IEnumerable<Bag>> GetBags(ulong userId);
+        Task<IEnumerable<BaggedDiscs>?> GetBaggedDiscs();
         Task<BaggedDiscs?> GetBaggedDiscs(int bagId);
         Task<BaggedDiscs> GetBaggedDiscs(ulong userId, int multiBagNumber = 0);
+        Task<bool> RemoveAllDiscsFromBag(int bagId);
         Task<Bag> CreateBag(ulong userId);
         Task<Disc> AddDiscToBag(int discId, int bagId);
         Task<bool> RemoveDiscFromBag(int discId, int bagId);
