@@ -14,5 +14,6 @@ namespace DiscgolfBot.Data
         Task<Disc> AddDiscToBag(int discId, int bagId);
         Task<bool> RemoveDiscFromBag(int discId, int bagId);
         Task<Bag> UpdatePutter(int bagId, int putterId);
+        Task<MyBag> AddMyBagDisc(int bagId, int discId, int? plasticId, double? weight, string? description, double? speed, double? glide, double? turn, double? fade);
     }
 }

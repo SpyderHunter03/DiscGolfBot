@@ -2,7 +2,6 @@
 using DiscgolfBot.Data.Models;
 using DiscgolfBot.Data.Models.ViewModels;
 using MySql.Data.MySqlClient;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DiscgolfBot.Data
 {
@@ -165,25 +164,25 @@ namespace DiscgolfBot.Data
 
         public async Task<Bag> CreateBag(ulong userId)
         {
-            var insertQuery = $"INSERT INTO bag (userId, multiBagNumber) VALUES (@userId, 0)";
-            var selectQuery = $"SELECT * FROM bag WHERE userId = @userId AND multiBagNumber = 0";
+            var insertQuery = $"INSERT INTO bag (userId, multiBagNumber) VALUES (@userId, 0); SELECT LAST_INSERT_ID();";
+            var selectQuery = $"SELECT * FROM bag WHERE id = @id";
             var param = new { userId };
 
             using var connection = new MySqlConnection(_connectionString);
-            var rowsAffected = await connection.ExecuteAsync(insertQuery, param);
-            var insertedBag = await connection.QuerySingleAsync<Bag>(selectQuery, param);
+            var lastInsertedId = await connection.QuerySingleAsync<int>(insertQuery, param);
+            var insertedBag = await connection.QuerySingleAsync<Bag>(selectQuery, new { id = lastInsertedId });
             return insertedBag;
         }
 
         public async Task<Disc> AddDiscToBag(int discId, int bagId)
         {
-            var insertQuery = $"INSERT INTO baggeddiscs (discId, bagId) VALUES (@discId, @bagId)";
-            var selectQuery = $"SELECT * FROM discs WHERE id = @discId";
+            var insertQuery = $"INSERT INTO baggeddiscs (discId, bagId) VALUES (@discId, @bagId); SELECT LAST_INSERT_ID();";
+            var selectQuery = $"SELECT * FROM discs WHERE id = @id";
             var param = new { discId, bagId };
 
             using var connection = new MySqlConnection(_connectionString);
-            var rowsAffected = await connection.ExecuteAsync(insertQuery, param);
-            var insertedBaggedDisc = await connection.QuerySingleAsync<Disc>(selectQuery, param);
+            var lastInsertedId = await connection.QuerySingleAsync<int>(insertQuery, param);
+            var insertedBaggedDisc = await connection.QuerySingleAsync<Disc>(selectQuery, new { id = lastInsertedId });
             return insertedBaggedDisc;
         }
 
@@ -217,6 +216,18 @@ namespace DiscgolfBot.Data
             var rowsAffected = await connection.ExecuteAsync(updateQuery, param);
             var updatedBag = await connection.QuerySingleAsync<Bag>(selectQuery, param);
             return updatedBag;
+        }
+
+        public async Task<MyBag> AddMyBagDisc(int bagId, int discId, int? plasticId, double? weight, string? description, double? speed, double? glide, double? turn, double? fade)
+        {
+            var insertQuery = $"INSERT INTO mybag (bagId, discId, plasticId, weight, description, speed, glide, turn, fade) VALUES (@bagId, @discId, @plasticId, @weight, @description, @speed, @glide, @turn, @fade); SELECT LAST_INSERT_ID();";
+            var selectQuery = $"SELECT * FROM mybag WHERE id = @id";
+            var param = new { bagId, discId, plasticId, weight, description, speed, glide, turn, fade };
+
+            using var connection = new MySqlConnection(_connectionString);
+            var lastInsertedId = await connection.QuerySingleAsync<int>(insertQuery, param);
+            var insertedBaggedDisc = await connection.QuerySingleAsync<MyBag>(selectQuery, new { id = lastInsertedId });
+            return insertedBaggedDisc;
         }
     }
 }
