@@ -22,9 +22,9 @@ namespace DiscgolfBot.SlashCommands.BagCommands
             [Option("weight", "Disc Weight")] double? weight = null,
             [Option("description", "Disc Description")] string? description = null,
             [Option("speed", "Disc Speed")] double? speed = null,
-            [Option("glide", "Disc Speed")] double? glide = null,
-            [Option("turn", "Disc Speed")] double? turn = null,
-            [Option("fade", "Disc Speed")] double? fade = null)
+            [Option("glide", "Disc Glide")] double? glide = null,
+            [Option("turn", "Disc Turn")] double? turn = null,
+            [Option("fade", "Disc Fade")] double? fade = null)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource,
                 new DiscordInteractionResponseBuilder().WithContent($"{ctx.Member.DisplayName} called /updatemybag {discName} {plasticName}{(weight.HasValue ? $" {weight.Value}" : "")}{(!string.IsNullOrWhiteSpace(description) ? $" {description}" : "")}{(speed.HasValue ? $" {speed.Value}" : "")}{(glide.HasValue ? $" {glide.Value}" : "")}{(turn.HasValue ? $" {turn.Value}" : "")}{(fade.HasValue ? $" {fade.Value}" : "")}")
