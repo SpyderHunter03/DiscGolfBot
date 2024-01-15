@@ -162,6 +162,68 @@ namespace DiscgolfBot.Data
             public string PutterManufacturerName { get; set; }
         }
 
+        public async Task<BaggedDiscs?> GetMyBag(ulong userId, int multiBagNumber = 0)
+        {
+            var query = @"
+                SELECT
+                    b.*, 
+                    d.*, m.name AS ManufacturerName,
+                    p.*, pm.name AS PutterManufacturerName,
+                    mb.*, pl.name as Plastic
+                FROM baggeddiscs bd
+                INNER JOIN bag b ON b.id = bd.bagId
+                INNER JOIN discs d ON d.id = bd.discId
+                INNER JOIN manufacturers m ON m.id = d.manufacturerId
+                LEFT JOIN discs p ON p.id = b.putterId
+                LEFT JOIN manufacturers pm ON pm.id = p.manufacturerId
+                LEFT JOIN mybag mb ON mb.bagId = bd.bagId AND mb.discId = bd.discId 
+                LEFT JOIN plastics pl ON mb.plasticid = pl.id
+                WHERE b.userId = @userId AND b.multiBagNumber = @multiBagNumber";
+
+            BaggedDiscs? baggedDiscs = null;
+            using var connection = new MySqlConnection(_connectionString);
+
+            await connection.QueryAsync<BaggedDiscs, MyDiscs, PutterDetails, MyBagDetails, BaggedDiscs>(
+                query,
+                (bag, disc, putter, mybag) =>
+                {
+                    if (baggedDiscs == null || baggedDiscs.Id != bag.Id)
+                    {
+                        baggedDiscs = bag;
+                        baggedDiscs.Discs = new List<DiscDetails>();
+                    }
+
+                    if (bag.PutterId.HasValue && putter != null && baggedDiscs.Putter == null)
+                    {
+                        putter.ManufacturerName = putter.PutterManufacturerName;
+                        baggedDiscs.Putter = putter;
+                    }
+
+                    if (!baggedDiscs.Discs.Any(d => d.ManufacturerId == disc.ManufacturerId && d.Name.Equals(disc.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        if (mybag != null)
+                        {
+                            disc.Discs ??= new List<MyBagDetails>();
+                            disc.Discs.Add(mybag);
+                        }
+
+                        baggedDiscs.Discs.Add(disc);
+                    } 
+                    else if (baggedDiscs.Discs.Any(d => d.ManufacturerId == disc.ManufacturerId && d.Name.Equals(disc.Name, StringComparison.InvariantCultureIgnoreCase)) && mybag != null)
+                    {
+                        var baggedDisc = baggedDiscs.Discs.First(d => d.ManufacturerId == disc.ManufacturerId && d.Name.Equals(disc.Name, StringComparison.InvariantCultureIgnoreCase));
+                        (baggedDisc as MyDiscs)?.Discs?.Add(mybag);
+                    }
+
+                    return baggedDiscs;
+                },
+                new { userId, multiBagNumber },
+                splitOn: "Id,Id,Id,Id"
+            );
+
+            return baggedDiscs;
+        }
+
         public async Task<Bag> CreateBag(ulong userId)
         {
             var insertQuery = $"INSERT INTO bag (userId, multiBagNumber) VALUES (@userId, 0); SELECT LAST_INSERT_ID();";
