@@ -37,5 +37,8 @@ jobs:
           echo ${{ secrets.SUDOPWD }} | sudo -S cp "$SRC" "$DEST"
           sudo systemctl daemon-reload
         fi
-    - name: Restart service
-      run: echo ${{ secrets.SUDOPWD }} | sudo -S systemctl restart DiscGolfBot
+    - name: Enable and restart service
+      run: |
+        echo ${{ secrets.SUDOPWD }} | sudo -S systemctl enable discgolfbot.service
+        echo ${{ secrets.SUDOPWD }} | sudo -S systemctl restart discgolfbot.service
+
