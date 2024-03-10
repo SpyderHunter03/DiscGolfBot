@@ -32,7 +32,7 @@ jobs:
     - name: Copy service file if it does not exist
       run: |
         DEST="/etc/systemd/system/discgolfbot.service"
-        SRC="${{ github.workspace }}/DiscGolfBot/DiscGolfBot/service/discgolfbot.service"
+        SRC="${{ github.workspace }}/service/discgolfbot.service"
         if [ ! -f "$DEST" ]; then
           echo ${{ secrets.SUDOPWD }} | sudo -S cp "$SRC" "$DEST"
           sudo systemctl daemon-reload
