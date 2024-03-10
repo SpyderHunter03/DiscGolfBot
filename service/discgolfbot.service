@@ -4,7 +4,7 @@ Description=DiscGolfBot Discord Bot
 [Service]
 # systemd will run this executable to start the service
 # if /usr/bin/dotnet doesn't work, use `which dotnet` to find correct dotnet executable path
-ExecStart=/usr/bin/dotnet /home/spyderhunter03/actions-runner/_work/DiscGolfBot/DiscGolfBot/publish/DiscgolfBot.dll
+ExecStart=/usr/bin/dotnet /home/tristan/actions-runner/_work/DiscGolfBot/DiscGolfBot/publish/DiscgolfBot.dll
 # to query logs using journalctl, set a logical name here
 SyslogIdentifier=DiscGolfBot
 
@@ -23,7 +23,7 @@ RestartSec=5
 # To figure out this value, run 'env | grep DOTNET_ROOT' when dotnet has been loaded into your shell.
 Environment=DOTNET_ROOT=/usr/lib64/dotnet
 
-WorkingDirectory=/home/spyderhunter03/actions-runner/_work/DiscGolfBot/DiscGolfBot/publish/
+WorkingDirectory=/home/tristan/actions-runner/_work/DiscGolfBot/DiscGolfBot/publish/
 
 [Install]
 WantedBy=multi-user.target
