@@ -29,5 +29,13 @@ jobs:
       run: dotnet build ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-restore
     - name: Publish
       run: dotnet publish ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-build --output ./publish
+    - name: Copy service file if it does not exist
+      run: |
+        DEST="/etc/systemd/system/discgolfbot.service"
+        SRC="./DiscgolfBot/DiscgolfBot/service/discgolfbot.service"
+        if [ ! -f "$DEST" ]; then
+          echo ${{ secrets.SUDOPWD }} | sudo -S cp "$SRC" "$DEST"
+          sudo systemctl daemon-reload
+        fi
     - name: Restart service
       run: echo ${{ secrets.SUDOPWD }} | sudo -S systemctl restart DiscGolfBot
