@@ -30,4 +30,4 @@ jobs:
     - name: Publish
       run: dotnet publish ./DiscgolfBot/DiscgolfBot.sln --configuration Release --no-build --output ./publish
     - name: Restart service
-      run: echo ${{ secrets.SUDOPWD }} | sudo systemctl restart DiscGolfBot
+      run: echo ${{ secrets.SUDOPWD }} | sudo -S systemctl restart DiscGolfBot
